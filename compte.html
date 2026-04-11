@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Mon Profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #a855f7; --dark: #7c3aed; }
+        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; padding-bottom: 100px; }
+        .profile-header { background: linear-gradient(135deg, var(--primary), var(--dark)); height: 220px; border-radius: 0 0 50px 50px; position: relative; }
+        .user-avatar { width: 90px; height: 90px; border: 4px solid white; border-radius: 30px; background: #eee; position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .wallet-card { background: white; border-radius: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.05); margin-top: 60px; border: 1px solid #f3e8ff; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 18px; border-radius: 20px; transition: 0.2s; cursor: pointer; margin-bottom: 8px; }
+        .menu-item:active { background-color: #f3f0ff; }
+        .menu-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #eee; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <div class="pt-10 text-center text-white">
+            <h2 class="text-xl font-black italic tracking-widest">ESPACE MEMBRE</h2>
+            <p id="displayPhone" class="text-sm opacity-80 mt-1">Chargement...</p>
+        </div>
+        <div class="user-avatar flex items-center justify-center bg-white">
+            <i class="fa-solid fa-user-tie text-4xl text-purple-300"></i>
+        </div>
+    </div>
+
+    <div class="px-6">
+        <div class="wallet-card p-6 text-center">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Solde Disponible</p>
+            <h1 id="balance" class="text-3xl font-black text-gray-800 mb-6">... CDF</h1>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="window.location.href='recharge.html'" class="bg-purple-600 text-white py-3 rounded-2xl font-bold text-xs shadow-lg shadow-purple-200 uppercase">Recharger</button>
+                <button onclick="window.location.href='retrait.html'" class="bg-gray-800 text-white py-3 rounded-2xl font-bold text-xs shadow-lg shadow-gray-200 uppercase">Retirer</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="bg-white p-4 rounded-3xl border border-gray-100 text-center">
+                <p class="text-[9px] font-bold text-gray-400 uppercase">Gain Cumulé</p>
+                <p id="totalIncome" class="text-sm font-black text-purple-600 mt-1">... CDF</p>
+            </div>
+            <div class="bg-white p-4 rounded-3xl border border-gray-100 text-center">
+                <p class="text-[9px] font-bold text-gray-400 uppercase">Code Promo</p>
+                <p id="promoCode" class="text-sm font-black text-gray-800 mt-1">---</p>
+            </div>
+        </div>
+
+        <div class="mt-8 space-y-2">
+            <div class="menu-item bg-white border border-gray-50" onclick="window.location.href='mes_produits.html'">
+                <div class="flex items-center gap-4">
+                    <div class="menu-icon bg-purple-100 text-purple-600"><i class="fa-solid fa-gem"></i></div>
+                    <span class="text-sm font-bold text-gray-700">Mes Gisement Miniers</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+
+            <div class="menu-item bg-white border border-gray-50" onclick="window.location.href='historique.html'">
+                <div class="flex items-center gap-4">
+                    <div class="menu-icon bg-blue-100 text-blue-600"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <span class="text-sm font-bold text-gray-700">Historique des transactions</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+
+            <div class="menu-item bg-white border border-gray-50" onclick="window.location.href='https://t.me/+IuQS1ZQt7eZjMzZk'">
+                <div class="flex items-center gap-4">
+                    <div class="menu-icon bg-green-100 text-green-600"><i class="fa-solid fa-headset"></i></div>
+                    <span class="text-sm font-bold text-gray-700">Support Client H24</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+            </div>
+
+            <div class="menu-item bg-white border border-gray-50" onclick="logout()">
+                <div class="flex items-center gap-4">
+                    <div class="menu-icon bg-red-50 text-red-500"><i class="fa-solid fa-power-off"></i></div>
+                    <span class="text-sm font-bold text-red-500">Déconnexion</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="flex flex-col items-center text-gray-400"><i class="fa-solid fa-house text-xl mb-1"></i><span class="text-[10px] font-bold">Accueil</span></a>
+        <a href="produit.html" class="flex flex-col items-center text-gray-400"><i class="fa-solid fa-gem text-xl mb-1"></i><span class="text-[10px] font-bold">Produit</span></a>
+        <a href="equipe.html" class="flex flex-col items-center text-gray-400"><i class="fa-solid fa-users text-xl mb-1"></i><span class="text-[10px] font-bold">Équipe</span></a>
+        <a href="compte.html" class="flex flex-col items-center text-purple-600"><i class="fa-solid fa-circle-user text-xl mb-1"></i><span class="text-[10px] font-bold">Compte</span></a>
+    </nav>
+
+    <script>
+        const userPhone = localStorage.getItem('userPhone');
+        const dbURL = "https://firstsolar-e2ba3-default-rtdb.firebaseio.com";
+
+        if(!userPhone) window.location.href = "login.html";
+
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${dbURL}/users/${userPhone}.json`);
+                const user = await res.json();
+
+                if(user) {
+                    document.getElementById('displayPhone').innerText = userPhone;
+                    document.getElementById('balance').innerText = (user.balance || 0).toLocaleString() + " CDF";
+                    document.getElementById('totalIncome').innerText = (user.revenuCumule || 0).toLocaleString() + " CDF";
+                    document.getElementById('promoCode').innerText = "CMS" + userPhone.slice(-5);
+                }
+            } catch (e) {
+                console.error("Erreur profil:", e);
+            }
+        }
+
+        function logout() {
+            if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
+                localStorage.clear();
+                window.location.href = "login.html";
+            }
+        }
+
+        window.onload = loadProfile;
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Historique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #a855f7; --dark: #7c3aed; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; padding-bottom: 30px; }
+        .header-gradient { background: linear-gradient(135deg, var(--primary), var(--dark)); padding: 40px 20px; border-radius: 0 0 35px 35px; color: white; text-align: center; }
+        .tab-btn { flex: 1; padding: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; border-radius: 15px; transition: 0.3s; color: #94a3b8; }
+        .tab-active { background: white; color: var(--dark); shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .trans-card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 12px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .status-pill { padding: 4px 10px; border-radius: 8px; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        .status-en_attente { background: #fef3c7; color: #92400e; }
+        .status-valide { background: #dcfce7; color: #166534; }
+        .status-refuse { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="header-gradient mb-6">
+        <h1 class="text-xl font-black italic uppercase tracking-tighter">Mes Transactions</h1>
+        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest mt-1">Suivi financier complet</p>
+    </div>
+
+    <div class="max-w-md mx-auto">
+        <div class="flex bg-gray-100 p-1.5 rounded-2xl mb-6">
+            <button id="btnRecharge" onclick="showType('recharge')" class="tab-btn tab-active">Recharges</button>
+            <button id="btnRetrait" onclick="showType('retrait')" class="tab-btn">Retraits</button>
+        </div>
+
+        <div id="historyList" class="space-y-3">
+            <p class="text-center py-10 text-gray-400 font-bold text-xs animate-pulse">CHARGEMENT DE L'HISTORIQUE...</p>
+        </div>
+
+        <button onclick="window.history.back()" class="w-full mt-10 text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]">
+            <i class="fa-solid fa-chevron-left mr-2"></i> Retour au compte
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://firstsolar-e2ba3-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const userPhone = localStorage.getItem('userPhone');
+
+        let currentType = 'recharge';
+
+        window.showType = (type) => {
+            currentType = type;
+            document.getElementById('btnRecharge').classList.toggle('tab-active', type === 'recharge');
+            document.getElementById('btnRetrait').classList.toggle('tab-active', type === 'retrait');
+            loadData();
+        };
+
+        async function loadData() {
+            const list = document.getElementById('historyList');
+            const path = currentType === 'recharge' ? 'demandes_recharge' : 'demandes_retrait';
+            
+            try {
+                const snap = await get(ref(db, path));
+                const data = snap.val();
+                list.innerHTML = "";
+
+                let results = [];
+                if(data) {
+                    for(let id in data) {
+                        // On filtre pour ne voir que les transactions de l'utilisateur connecté
+                        if(data[id].compteUtilisateur === userPhone || data[id].utilisateur === userPhone) {
+                            results.push(data[id]);
+                        }
+                    }
+                }
+
+                if(results.length === 0) {
+                    list.innerHTML = `<div class="text-center py-16 opacity-20">
+                        <i class="fa-solid fa-clock-rotate-left text-5xl mb-3"></i>
+                        <p class="text-[10px] font-black uppercase">Aucune donnée trouvée</p>
+                    </div>`;
+                    return;
+                }
+
+                // Trier par date (plus récent en premier)
+                results.reverse().forEach(item => {
+                    const statusClass = `status-${item.status || 'en_attente'}`;
+                    const statusLabel = (item.status || 'En attente').replace('_', ' ');
+                    const icone = currentType === 'recharge' ? 'fa-arrow-trend-up text-green-500' : 'fa-arrow-trend-down text-red-500';
+                    const montant = typeof item.montant === 'string' ? item.montant : item.montant.toLocaleString() + " CDF";
+
+                    list.innerHTML += `
+                        <div class="trans-card">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid ${icone}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-gray-800">${montant}</p>
+                                    <p class="text-[9px] text-gray-400 font-bold uppercase">${item.date || 'Date inconnue'}</p>
+                                </div>
+                            </div>
+                            <span class="status-pill ${statusClass}">${statusLabel}</span>
+                        </div>
+                    `;
+                });
+
+            } catch (e) {
+                list.innerHTML = `<p class="text-center text-red-500 text-[10px] font-bold">ERREUR DE CONNEXION</p>`;
+            }
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Retrait Sécurisé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #a855f7; --dark: #7c3aed; }
+        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; padding-bottom: 50px; }
+        .header-bg { background: linear-gradient(135deg, var(--primary), var(--dark)); padding: 40px 20px; border-radius: 0 0 40px 40px; text-align: center; color: white; }
+        .glass-card { background: white; border-radius: 25px; padding: 25px; border: 1px solid rgba(168, 85, 247, 0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: -30px; }
+        .method-card { border: 2px solid #f3f4f6; border-radius: 15px; padding: 12px; cursor: pointer; transition: 0.3s; text-align: center; }
+        .method-card.active { border-color: var(--primary); background: #f3e8ff; }
+        input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e5e7eb; background: #f9fafb; margin-top: 5px; outline: none; }
+        input:focus { border-color: var(--primary); background: white; }
+        .btn-withdraw { width: 100%; padding: 18px; background: var(--dark); color: white; border: none; border-radius: 18px; font-weight: 900; text-transform: uppercase; margin-top: 20px; box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3); }
+        .info-box { background: #fffbeb; border: 1px solid #fef3c7; border-radius: 15px; padding: 12px; margin-top: 15px; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="header-bg">
+        <h1 class="text-2xl font-black italic tracking-tighter uppercase">Retrait de Gains</h1>
+        <p id="userBalance" class="text-lg font-bold opacity-90 mt-1">Solde: 0 CDF</p>
+    </div>
+
+    <div class="container max-w-md mx-auto">
+        <div class="glass-card">
+            <p class="text-[11px] font-black text-gray-400 uppercase mb-4 text-center">1. Choisir le mode de réception</p>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="method-card" onclick="selectMethod('M-Pesa')">
+                    <p class="text-[10px] font-black">M-PESA</p>
+                </div>
+                <div class="method-card" onclick="selectMethod('Airtel Money')">
+                    <p class="text-[10px] font-black text-red-600">AIRTEL</p>
+                </div>
+                <div class="method-card" onclick="selectMethod('Orange Money')">
+                    <p class="text-[10px] font-black text-orange-500">ORANGE</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase ml-2">Montant à retirer (CDF)</label>
+                    <input type="number" id="amount" placeholder="Minimum 5000">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase ml-2">Numéro de réception</label>
+                    <input type="tel" id="receiverPhone" placeholder="08XXXXXXXX">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase ml-2">Nom du compte</label>
+                    <input type="text" id="accountName" placeholder="Nom complet">
+                </div>
+            </div>
+
+            <div class="info-box">
+                <p class="text-[10px] text-amber-700 font-bold leading-tight">
+                    <i class="fa-solid fa-circle-info mr-1"></i> 
+                    Les retraits sont traités dans un délai de 1h à 24h. Frais de réseau : 5%.
+                </p>
+            </div>
+
+            <button id="withdrawBtn" class="btn-withdraw">Confirmer le retrait</button>
+        </div>
+
+        <button onclick="window.history.back()" class="w-full mt-6 text-gray-400 text-xs font-bold uppercase tracking-widest">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Retour au profil
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, push, set, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://firstsolar-e2ba3-default-rtdb.firebaseio.com"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let selectedMethod = "";
+        const userPhone = localStorage.getItem('userPhone');
+
+        // Charger le solde au démarrage
+        async function loadBalance() {
+            if(!userPhone) window.location.href = "login.html";
+            const snap = await get(ref(db, `users/${userPhone}`));
+            const user = snap.val();
+            if(user) {
+                document.getElementById('userBalance').innerText = `Solde: ${user.balance.toLocaleString()} CDF`;
+                window.currentUser = user;
+            }
+        }
+
+        window.selectMethod = (method) => {
+            selectedMethod = method;
+            document.querySelectorAll('.method-card').forEach(c => {
+                c.classList.remove('active');
+                if(c.innerText.includes(method.split(' ')[0])) c.classList.add('active');
+            });
+        };
+
+        document.getElementById('withdrawBtn').onclick = async () => {
+            const amount = parseInt(document.getElementById('amount').value);
+            const phone = document.getElementById('receiverPhone').value;
+            const name = document.getElementById('accountName').value;
+
+            // Vérifications
+            if(!selectedMethod || !amount || !phone || !name) return alert("Veuillez remplir tous les champs.");
+            if(amount < 5000) return alert("Le montant minimum est de 5.000 CDF.");
+            
+            // Logique de sécurité : Droit au retrait
+            if(!window.currentUser.droitRetrait) {
+                return alert("Droit de retrait refusé. Vous devez d'abord investir dans un gisement.");
+            }
+
+            if(window.currentUser.balance < amount) {
+                return alert("Solde insuffisant.");
+            }
+
+            const btn = document.getElementById('withdrawBtn');
+            btn.disabled = true; btn.innerText = "TRAITEMENT EN COURS...";
+
+            try {
+                // 1. Soustraire le montant du solde immédiatement
+                const newBalance = window.currentUser.balance - amount;
+                await update(ref(db, `users/${userPhone}`), { balance: newBalance });
+
+                // 2. Enregistrer la demande de retrait
+                const withdrawalRef = ref(db, 'demandes_retrait');
+                await push(withdrawalRef, {
+                    utilisateur: userPhone,
+                    montant: amount,
+                    methode: selectedMethod,
+                    numeroReception: phone,
+                    nomCompte: name,
+                    status: "en_attente",
+                    date: new Date().toLocaleString()
+                });
+
+                alert("Votre demande de retrait a été envoyée avec succès !");
+                window.location.href = "dashboard.html";
+
+            } catch (e) {
+                alert("Erreur lors de la transaction.");
+                btn.disabled = false; btn.innerText = "Confirmer le retrait";
+            }
+        };
+
+        window.onload = loadBalance;
+    </script>
+</body>
+</html>

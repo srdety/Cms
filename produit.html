@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Investissement Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary-color: #a855f7; --accent-color: #7c3aed; }
+        body { background-color: #f3f4f6; font-family: 'Segoe UI', sans-serif; padding-bottom: 100px; }
+        .vip-card { background: white; border-radius: 25px; overflow: hidden; margin-bottom: 25px; border: 1px solid rgba(168, 85, 247, 0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .vip-img { width: 100%; height: 210px; object-fit: cover; }
+        .details-box { background: #faf5ff; border: 1px solid #f3e8ff; border-radius: 15px; padding: 12px; margin-top: 10px; }
+        .btn-buy { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; width: 100%; padding: 16px; border-radius: 18px; font-weight: 900; text-transform: uppercase; transition: 0.3s; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
+        .invest-badge { background: var(--accent-color); color: white; padding: 5px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; z-index: 1000; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="flex justify-between items-center mb-6 pt-4">
+        <div class="text-left">
+            <h1 class="text-2xl font-black italic text-gray-900 text-purple-600">CMS MINING</h1>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Gisements Miniers RDC</p>
+        </div>
+        <div class="invest-badge" onclick="window.location.href='mes_produits.html'">
+            <i class="fa-solid fa-gem"></i>
+            <span id="investCount">0</span>
+        </div>
+    </div>
+
+    <div id="vip-container"></div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-house text-xl"></i><span class="text-[10px] font-bold mt-1">Accueil</span>
+        </a>
+        <a href="produit.html" class="flex flex-col items-center text-purple-600">
+            <i class="fa-solid fa-gem text-xl"></i><span class="text-[10px] font-bold mt-1">Produit</span>
+        </a>
+        <a href="compte.html" class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-user text-xl"></i><span class="text-[10px] font-bold mt-1">Compte</span>
+        </a>
+    </nav>
+
+    <script>
+        const cycleDays = 22; // Cycle de revenus de 22 jours
+        const vipData = [
+            { id: 1, img: "IMG_4397.jpeg", price: 18000, daily: 3700 },
+            { id: 2, img: "IMG_4398.jpeg", price: 35000, daily: 7500 },
+            { id: 3, img: "IMG_4399.jpeg", price: 50000, daily: 11200 },
+            { id: 4, img: "IMG_4400.jpeg", price: 75000, daily: 15800 },
+            { id: 5, img: "IMG_4401.jpeg", price: 100000, daily: 25000 },
+            { id: 6, img: "IMG_4402.jpeg", price: 150000, daily: 38000 },
+            { id: 7, img: "IMG_4403.jpeg", price: 300000, daily: 80000 },
+            { id: 8, img: "IMG_4404.jpeg", price: 500000, daily: 110000 },
+            { id: 9, img: "IMG_4405.jpeg", price: 800000, daily: 280000 },
+            { id: 10, img: "IMG_4406.jpeg", price: 1000000, daily: 320000 },
+            { id: 11, img: "IMG_4407.jpeg", price: 2000000, daily: 700000 },
+            { id: 12, img: "IMG_4408.jpeg", price: 3000000, daily: 950000 }
+        ];
+
+        const userPhone = localStorage.getItem('userPhone');
+        const dbURL = "https://firstsolar-e2ba3-default-rtdb.firebaseio.com";
+
+        const container = document.getElementById('vip-container');
+        vipData.forEach(vip => {
+            const totalProfit = vip.daily * cycleDays;
+            container.innerHTML += `
+                <div class="vip-card">
+                    <img src="${vip.img}" class="vip-img">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="font-black text-xl text-gray-800 uppercase italic">GISEMENT VIP ${vip.id}</h2>
+                            <span class="font-black text-xl text-purple-600">${vip.price.toLocaleString()} CDF</span>
+                        </div>
+                        
+                        <div class="details-box grid grid-cols-2 gap-2 mb-4">
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase">Gain Journalier</p>
+                                <p class="font-black text-purple-700 text-sm">${vip.daily.toLocaleString()} CDF</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase">Cycle de Revenus</p>
+                                <p class="font-black text-gray-800 text-sm">${cycleDays} Jours</p>
+                            </div>
+                            <div class="col-span-2 border-t border-purple-100 pt-2 mt-1">
+                                <p class="text-[9px] font-bold text-gray-400 uppercase">Revenu Total Estimé</p>
+                                <p class="font-black text-green-600 text-md">${totalProfit.toLocaleString()} CDF</p>
+                            </div>
+                        </div>
+
+                        <button onclick="acheterProduit(${vip.id}, ${vip.price}, ${vip.daily})" class="btn-buy">Activer l'Exploitation</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        async function updateStatsAndCollect() {
+            if(!userPhone) return;
+            try {
+                const iRes = await fetch(`${dbURL}/investissements/${userPhone}.json`);
+                const investissements = await iRes.json();
+                
+                if(investissements) {
+                    document.getElementById('investCount').innerText = Object.keys(investissements).length;
+                    const uRes = await fetch(`${dbURL}/users/${userPhone}.json`);
+                    const user = await uRes.json();
+                    let totalGains = 0;
+                    const now = Date.now();
+
+                    for (let key in investissements) {
+                        const inv = investissements[key];
+                        const derniereCollecte = new Date(inv.dernierCollecte).getTime();
+                        if (now - derniereCollecte >= 86400000) {
+                            const joursPasses = Math.floor((now - derniereCollecte) / 86400000);
+                            totalGains += inv.gainJournalier * joursPasses;
+                            const nouvelleDate = new Date(derniereCollecte + (joursPasses * 86400000)).toISOString();
+                            await fetch(`${dbURL}/investissements/${userPhone}/${key}.json`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ dernierCollecte: nouvelleDate })
+                            });
+                        }
+                    }
+
+                    if (totalGains > 0) {
+                        const nouvelleBalance = (parseFloat(user.balance) || 0) + totalGains;
+                        const nouveauCumule = (parseFloat(user.revenuCumule) || 0) + totalGains;
+                        await fetch(`${dbURL}/users/${userPhone}.json`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ balance: nouvelleBalance, revenuCumule: nouveauCumule })
+                        });
+                        alert(`Félicitations ! Vos revenus journaliers de +${totalGains.toLocaleString()} CDF ont été ajoutés.`);
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function acheterProduit(id, prix, gain) {
+            if(!userPhone) return window.location.href="login.html";
+            const response = await fetch(`${dbURL}/users/${userPhone}.json`);
+            const user = await response.json();
+
+            if (user.balance >= prix) {
+                const nouveauSolde = user.balance - prix;
+                const achat = {
+                    vipId: id,
+                    nom: "Gisement VIP " + id,
+                    gainJournalier: gain,
+                    dateAchat: new Date().toISOString(),
+                    dernierCollecte: new Date().toISOString(),
+                    expireLe: new Date(Date.now() + cycleDays * 24 * 60 * 60 * 1000).toISOString()
+                };
+
+                await fetch(`${dbURL}/users/${userPhone}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ balance: nouveauSolde, vipActive: id, droitRetrait: true })
+                });
+
+                await fetch(`${dbURL}/investissements/${userPhone}.json`, {
+                    method: 'POST',
+                    body: JSON.stringify(achat)
+                });
+
+                alert("Exploitation minière activée ! Vos gains seront versés toutes les 24h.");
+                window.location.reload();
+            } else {
+                alert("Solde insuffisant pour cet investissement.");
+            }
+        }
+
+        window.onload = updateStatsAndCollect;
+    </script>
+</body>
+</html>

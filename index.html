@@ -6,7 +6,6 @@
     <title>CMS - Inscription</title>
     <style>
         :root { 
-            /* Nouvelle palette Mauve */
             --primary-color: #a855f7; 
             --accent-color: #7c3aed;
             --dark-bg: rgba(15, 10, 25, 0.9); 
@@ -49,7 +48,7 @@
             <input type="text" id="inviteCode" placeholder="Code parrain" required>
         </div>
         
-        <button type="submit" class="btn-login">S'INSCRIRE MAINTENANT</button>
+        <button type="submit" class="btn-login" id="submitBtn">S'INSCRIRE MAINTENANT</button>
     </form>
     <div class="footer-link">Déjà inscrit ? <a href="login.html">Se connecter</a></div>
 </div>
@@ -65,23 +64,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // --- 1. LECTURE AUTOMATIQUE DU CODE D'INVITATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        if (refCode) {
+            document.getElementById('inviteCode').value = refCode;
+        }
+    });
+
     document.getElementById("registerForm").addEventListener("submit", async function(e) {
         e.preventDefault();
         
-        const phone = document.getElementById('phone').value.trim().replace(/\+/g, '');
+        const phone = document.getElementById('phone').value.trim().replace(/\s/g, '').replace(/\+/g, '');
         const password = document.getElementById('password').value.trim();
         const confirmPassword = document.getElementById('confirmPassword').value.trim();
         const inviteCode = document.getElementById('inviteCode').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
 
+        // Validations
         if (password !== confirmPassword) {
             alert("Les mots de passe ne correspondent pas.");
             return;
         }
 
         if (password.length < 6) {
-            alert("Le mot de passe doit contenir 6 chiffres.");
+            alert("Le mot de passe doit contenir au moins 6 chiffres.");
             return;
         }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "CRÉATION EN COURS...";
 
         try {
             const userRef = ref(db, 'users/' + phone);
@@ -89,22 +102,29 @@
 
             if (snapshot.exists()) {
                 alert("Ce numéro est déjà utilisé.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "S'INSCRIRE MAINTENANT";
             } else {
+                // Enregistrement des données
                 await set(userRef, {
                     phone: phone,
                     motDePasse: password,
-                    inviteCode: inviteCode,
+                    referralBy: inviteCode, // Champ parrain
                     balance: 0,
                     vipActive: 0,
                     lastHarvest: Date.now(),
-                    dateInscription: new Date().toLocaleString()
+                    dateInscription: new Date().toLocaleString(),
+                    // Génération du code personnel pour l'utilisateur
+                    myInviteCode: "CMS" + phone.slice(-5)
                 });
                 
-                alert("Compte CMS créé avec succès !");
+                alert("Compte CMS créé avec succès ! Connectez-vous.");
                 window.location.href = "login.html";
             }
         } catch (error) {
             alert("Erreur : " + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerText = "S'INSCRIRE MAINTENANT";
         }
     });
 </script>

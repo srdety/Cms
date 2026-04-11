@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS - Connexion</title>
+    <style>
+        :root { 
+            /* Palette Mauve identique à l'inscription */
+            --primary-color: #a855f7; 
+            --accent-color: #7c3aed;
+            --dark-bg: rgba(15, 10, 25, 0.9); 
+        }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: url('IMG_4394.jpeg') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: white; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 1; }
+        .auth-container { position: relative; z-index: 2; background: var(--dark-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8); width: 90%; max-width: 380px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.2); backdrop-filter: blur(10px); }
+        h1 { color: var(--primary-color); margin-bottom: 10px; font-size: 2.2em; text-transform: uppercase; font-weight: 900; letter-spacing: 2px; }
+        .tagline { font-size: 0.9em; margin-bottom: 30px; opacity: 0.8; color: #d8b4fe; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-size: 0.75em; color: var(--primary-color); text-transform: uppercase; font-weight: bold; }
+        input { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3); background: rgba(255, 255, 255, 0.05); color: white; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary-color); background: rgba(168, 85, 247, 0.1); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+        .btn-login { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 10px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
+        .btn-login:active { transform: scale(0.98); }
+        .footer-link { margin-top: 25px; font-size: 0.9em; }
+        .footer-link a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="overlay"></div>
+<div class="auth-container">
+    <h1>CMS</h1>
+    <p class="tagline">Connectez-vous à votre espace solaire</p>
+    <form id="loginForm">
+        <div class="input-group">
+            <label>Numéro de téléphone</label>
+            <input type="text" id="phone" placeholder="+243XXXXXXXXX" required>
+        </div>
+        <div class="input-group">
+            <label>Mot de passe</label>
+            <input type="password" id="password" placeholder="6 chiffres" required>
+        </div>
+        <button type="submit" class="btn-login">SE CONNECTER</button>
+    </form>
+    <div class="footer-link">Pas encore de compte ? <a href="index.html">Créer un compte</a></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Votre configuration Firebase reste identique
+    const firebaseConfig = {
+        databaseURL: "https://firstsolar-e2ba3-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const phone = document.getElementById('phone').value.trim().replace(/\+/g, '');
+        const password = document.getElementById('password').value.trim();
+
+        try {
+            const userRef = ref(db, 'users/' + phone);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                if (userData.motDePasse === password) {
+                    localStorage.setItem('userPhone', phone);
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("Mot de passe incorrect.");
+                }
+            } else {
+                alert("Ce compte n'existe pas.");
+            }
+        } catch (error) {
+            alert("Erreur de connexion.");
+        }
+    });
+</script>
+</body>
+</html>

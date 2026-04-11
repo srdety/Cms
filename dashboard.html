@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { 
+            --primary-color: #a855f7; 
+            --accent-color: #7c3aed;
+        }
+        body { background-color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding-bottom: 100px; }
+        .header-image { background: url('IMG_4395.jpeg') no-repeat center center; background-size: cover; height: 200px; position: relative; padding: 15px; }
+        .lv-badge { background: var(--primary-color); color: white; padding: 2px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3); }
+        .blue-logo { width: 55px; height: 55px; background: var(--accent-color); border-radius: 50%; position: absolute; right: 20px; top: 30px; border: 2px solid white; }
+        .balance-section { display: grid; grid-template-columns: 1fr 1fr; padding: 25px 20px; }
+        .icon-menu { display: grid; grid-template-columns: repeat(3, 1fr); background: #fcfcfc; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
+        .icon-item { text-align: center; cursor: pointer; }
+        .icon-item i { font-size: 32px; color: var(--primary-color); display: block; margin-bottom: 5px; opacity: 0.8; }
+        .icon-item span { font-size: 11px; color: #6b7280; font-weight: 500; }
+        .promo-banner { margin: 20px; background: url('IMG_4396.jpeg') no-repeat center center; background-size: cover; height: 110px; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: flex-end; padding-right: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-aller { background: var(--primary-color); color: white; padding: 6px 20px; border-radius: 15px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4); border: none; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-link { text-align: center; color: #9ca3af; font-size: 11px; text-decoration: none; }
+        .nav-link.active { color: var(--accent-color); }
+        .nav-link i { font-size: 24px; display: block; margin-bottom: 2px; }
+        #modal { position: fixed; inset: 0; background: rgba(15, 10, 25, 0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body>
+
+    <div id="modal">
+        <div class="bg-white rounded-[2.5rem] w-[90%] max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-300">
+            <div class="bg-gradient-to-r from-[#a855f7] to-[#7c3aed] py-5 text-center">
+                <h2 class="text-white font-black text-xl uppercase tracking-widest italic">CMS RDC</h2>
+            </div>
+            <div class="p-8">
+                <p class="text-gray-800 text-sm font-semibold leading-relaxed mb-6 text-justify">
+                    L’entreprise <span class="font-black text-[#7c3aed]">CMS</span> a été officiellement lancée en République Démocratique du Congo ce samedi 21 mars 2026. Elle offre aux Congolais l’opportunité de générer des revenus journaliers grâce à un système d’investissement en ligne sécurisé.
+                    <br><br>
+                    En cas de difficulté, notre service client est disponible et peut être contacté directement via notre canal officiel.
+                </p>
+                <a href="https://t.me/+IuQS1ZQt7eZjMzZk" class="block w-full bg-[#0088cc] text-white font-black py-4 rounded-2xl mb-4 text-center shadow-lg uppercase text-xs">
+                    <i class="fab fa-telegram-plane mr-2"></i> Rejoindre le Groupe Telegram
+                </a>
+                <button onclick="document.getElementById('modal').style.display='none'" class="w-full text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-purple-600">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-image">
+        <div class="flex items-center gap-1">
+            <span class="text-white text-xl font-bold">+</span>
+            <div class="lv-badge" id="userLevel">Membre CMS</div>
+        </div>
+        <div class="blue-logo"></div>
+    </div>
+
+    <div class="balance-section">
+        <div>
+            <h3 class="text-2xl font-black text-gray-800" id="userBalance">... CDF</h3>
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-wider mt-1">Solde actuel</p>
+        </div>
+        <div class="text-right">
+            <h3 class="text-2xl font-black text-purple-600" id="userIncome">... CDF</h3>
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-wider mt-1">Revenu Total</p>
+        </div>
+    </div>
+
+    <div class="icon-menu">
+        <div class="icon-item" onclick="window.location.href='recharge.html'">
+            <i class="fa-solid fa-sack-dollar"></i> <span>Recharger</span>
+        </div>
+        <div class="icon-item" onclick="window.location.href='retrait.html'">
+            <i class="fa-solid fa-cash-register"></i> <span>Retirer</span>
+        </div>
+        <div class="icon-item" onclick="window.location.href='historique.html'">
+            <i class="fa-solid fa-clipboard-list"></i> <span>Historique</span>
+        </div>
+    </div>
+
+    <div class="promo-banner">
+        <button class="btn-aller" onclick="window.location.href='produit.html'">Investir</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-house"></i><span>Accueil</span></a>
+        <a href="produit.html" class="nav-link"><i class="fa-solid fa-camera"></i><span>Produit</span></a>
+        <a href="equipe.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Équipe</span></a>
+        <a href="compte.html" class="nav-link"><i class="fa-solid fa-user"></i><span>Mon compte</span></a>
+    </nav>
+
+    <script>
+        const userPhone = localStorage.getItem('userPhone');
+        // Utilisation du lien Firebase CMS correct
+        const dbURL = "https://firstsolar-e2ba3-default-rtdb.firebaseio.com";
+
+        if(!userPhone) { window.location.href = "login.html"; }
+
+        async function syncAndCollect() {
+            try {
+                // Récupérer données utilisateur CMS
+                const uRes = await fetch(`${dbURL}/users/${userPhone}.json`);
+                const user = await uRes.json();
+
+                if (user) {
+                    let currentBalance = parseFloat(user.balance) || 0;
+                    let currentIncome = parseFloat(user.revenuCumule) || 0;
+
+                    // Mise à jour de l'affichage
+                    document.getElementById('userBalance').innerText = currentBalance.toLocaleString() + " CDF";
+                    document.getElementById('userIncome').innerText = currentIncome.toLocaleString() + " CDF";
+                    
+                    if(user.vipActive > 0) {
+                        document.getElementById('userLevel').innerText = "VIP " + user.vipActive;
+                    }
+                }
+
+            } catch (e) { console.error("Erreur de synchro", e); }
+        }
+
+        window.onload = syncAndCollect;
+    </script>
+</body>
+</html>

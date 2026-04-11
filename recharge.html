@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Recharge Sécurisée</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #a855f7; --dark: #7c3aed; }
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+            padding-bottom: 50px;
+        }
+        .header-bg {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            padding: 40px 20px;
+            border-radius: 0 0 40px 40px;
+            text-align: center; color: white;
+        }
+        .glass-card {
+            background: white; border-radius: 25px;
+            padding: 20px; border: 1px solid rgba(168, 85, 247, 0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-top: -30px;
+        }
+        .network-btn {
+            background: #f8f9fa; border: 2px solid transparent;
+            border-radius: 18px; padding: 12px;
+            text-align: center; cursor: pointer; transition: 0.3s;
+        }
+        .network-btn.active { border-color: var(--primary); background: #f3e8ff; }
+        .amount-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-top: 15px;
+        }
+        .amount-item {
+            background: white; border: 1px solid #e5e7eb;
+            padding: 12px 5px; border-radius: 15px; text-align: center;
+            font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.2s;
+        }
+        .amount-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .amount-item span { display: block; font-size: 8px; opacity: 0.7; font-weight: normal; }
+        
+        input {
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid #e5e7eb; background: #f9fafb;
+            margin-top: 5px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); background: white; }
+        .btn-submit {
+            width: 100%; padding: 18px; background: var(--dark);
+            color: white; border: none; border-radius: 18px;
+            font-weight: 900; text-transform: uppercase; margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="header-bg">
+        <h1 class="text-2xl font-black italic tracking-tighter">RECHARGE CMS</h1>
+        <p class="text-[10px] uppercase font-bold opacity-80 tracking-widest mt-1">Alimentez votre compte minier</p>
+    </div>
+
+    <div class="container max-w-md mx-auto">
+        
+        <div class="glass-card mb-6">
+            <p class="text-[11px] font-black text-gray-400 uppercase mb-4 text-center">1. Choisir le réseau de paiement</p>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="network-btn" onclick="selectNet('Airtel', '0997617251', '#ef4444')">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Airtel_logo.svg" class="h-6 mx-auto mb-1">
+                    <p class="text-[10px] font-bold">Airtel</p>
+                </div>
+                <div class="network-btn" onclick="selectNet('Orange', '0852771755', '#f97316')">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Orange_logo.svg" class="h-6 mx-auto mb-1">
+                    <p class="text-[10px] font-bold">Orange</p>
+                </div>
+                <div class="network-btn" onclick="selectNet('M-Pesa', '0812345678', '#dc2626')">
+                    <i class="fa-solid fa-mobile-screen-button text-red-600 text-xl mb-1"></i>
+                    <p class="text-[10px] font-bold">M-Pesa</p>
+                </div>
+            </div>
+
+            <div id="agentBox" class="hidden mt-4 p-4 bg-purple-50 rounded-2xl border border-purple-100 text-center animate-bounce-short">
+                <p id="netName" class="text-[10px] font-black text-purple-400 uppercase"></p>
+                <p id="netNumber" class="text-xl font-black text-purple-700 tracking-tighter"></p>
+                <p class="text-[9px] text-gray-400 italic mt-1">Copiez ce numéro pour effectuer le transfert</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[25px] p-6 shadow-sm border border-gray-100">
+            <p class="text-[11px] font-black text-gray-400 uppercase mb-4 text-center">2. Sélectionner le montant VIP</p>
+            <div class="amount-grid">
+                <div class="amount-item" onclick="setVal(18000)"><span>VIP 1</span>18.000</div>
+                <div class="amount-item" onclick="setVal(35000)"><span>VIP 2</span>35.000</div>
+                <div class="amount-item" onclick="setVal(50000)"><span>VIP 3</span>50.000</div>
+                <div class="amount-item" onclick="setVal(75000)"><span>VIP 4</span>75.000</div>
+                <div class="amount-item" onclick="setVal(100000)"><span>VIP 5</span>100.000</div>
+                <div class="amount-item" onclick="setVal(150000)"><span>VIP 6</span>150.000</div>
+                <div class="amount-item" onclick="setVal(300000)"><span>VIP 7</span>300.000</div>
+                <div class="amount-item" onclick="setVal(500000)"><span>VIP 8</span>500.000</div>
+                <div class="amount-item" onclick="setVal(800000)"><span>VIP 9</span>800.000</div>
+                <div class="amount-item" onclick="setVal(1000000)"><span>VIP 10</span>1.000.000</div>
+                <div class="amount-item" onclick="setVal(2000000)"><span>VIP 11</span>2.000.000</div>
+                <div class="amount-item" onclick="setVal(3000000)"><span>VIP 12</span>3.000.000</div>
+            </div>
+
+            <div class="mt-8 space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase ml-2">Numéro Expéditeur</label>
+                    <input type="tel" id="sender" placeholder="08XXXXXXXX">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase ml-2">ID Transaction (TID)</label>
+                    <input type="text" id="tid" placeholder="Code reçu par SMS">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-gray-400 uppercase ml-2">Montant choisi (CDF)</label>
+                    <input type="text" id="displayAmount" readonly class="font-bold text-purple-600">
+                </div>
+            </div>
+
+            <button id="submitBtn" class="btn-submit">Envoyer la preuve</button>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://firstsolar-e2ba3-default-rtdb.firebaseio.com"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Fonctions globales
+        window.selectNet = (name, num, color) => {
+            document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            const box = document.getElementById('agentBox');
+            box.classList.remove('hidden');
+            document.getElementById('netName').innerText = "Agent " + name;
+            document.getElementById('netNumber').innerText = num;
+        };
+
+        window.setVal = (val) => {
+            document.getElementById('displayAmount').value = val.toLocaleString() + " CDF";
+            document.querySelectorAll('.amount-item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        };
+
+        document.getElementById('submitBtn').onclick = async () => {
+            const sender = document.getElementById('sender').value;
+            const tid = document.getElementById('tid').value;
+            const amount = document.getElementById('displayAmount').value;
+
+            if(!sender || !tid || !amount) return alert("Veuillez remplir tous les champs.");
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerText = "TRAITEMENT...";
+
+            try {
+                const userPhone = localStorage.getItem('userPhone') || "Inconnu";
+                const rechargeRef = ref(db, 'demandes_recharge');
+                await push(rechargeRef, {
+                    telephoneExpediteur: sender,
+                    compteUtilisateur: userPhone,
+                    montant: amount,
+                    transactionID: tid,
+                    status: "en_attente",
+                    date: new Date().toLocaleString()
+                });
+                alert("Demande reçue ! Votre compte sera crédité après vérification (5-15 min).");
+                window.location.href = "dashboard.html";
+            } catch (e) {
+                alert("Erreur de connexion.");
+                btn.disabled = false; btn.innerText = "Envoyer la preuve";
+            }
+        };
+    </script>
+</body>
+</html>

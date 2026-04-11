@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS | Mes Exploitations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #a855f7; --dark: #7c3aed; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
+        .header-mini { background: linear-gradient(135deg, var(--primary), var(--dark)); padding: 30px 20px; border-radius: 0 0 30px 30px; color: white; text-align: center; }
+        .product-card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; border-left: 5px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .status-badge { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+        .timer-box { background: #f3e8ff; color: var(--dark); padding: 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="header-mini mb-6">
+        <h1 class="text-xl font-black italic uppercase tracking-tighter">Mes Gisements Actifs</h1>
+        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Suivi de production minière</p>
+    </div>
+
+    <div id="myProductsContainer" class="space-y-4">
+        <p class="text-center py-10 text-gray-400 font-bold text-xs animate-pulse">SYNCHRONISATION DE VOS MACHINES...</p>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-around items-center z-50">
+        <a href="dashboard.html" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-house"></i><span class="text-[9px] font-bold">Accueil</span></a>
+        <a href="produit.html" class="text-purple-600 flex flex-col items-center"><i class="fa-solid fa-gem"></i><span class="text-[9px] font-bold">Produit</span></a>
+        <a href="compte.html" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-circle-user"></i><span class="text-[9px] font-bold">Compte</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://firstsolar-e2ba3-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const userPhone = localStorage.getItem('userPhone');
+
+        async function loadMyInvestments() {
+            if(!userPhone) return window.location.href = "login.html";
+            
+            const container = document.getElementById('myProductsContainer');
+            try {
+                const snap = await get(ref(db, `investissements/${userPhone}`));
+                const data = snap.val();
+
+                if(!data) {
+                    container.innerHTML = `
+                        <div class="text-center py-20 opacity-30">
+                            <i class="fa-solid fa-box-open text-6xl mb-4"></i>
+                            <p class="text-xs font-black uppercase">Aucun investissement actif</p>
+                            <button onclick="window.location.href='produit.html'" class="mt-4 text-purple-600 font-bold text-xs underline">Voir les produits</button>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                for(let id in data) {
+                    const inv = data[id];
+                    const dateAchat = new Date(inv.dateAchat).toLocaleDateString();
+                    
+                    // Calcul du temps restant pour la prochaine collecte
+                    const derniere = new Date(inv.dernierCollecte).getTime();
+                    const maintenant = Date.now();
+                    const resteMs = 86400000 - (maintenant - derniere);
+                    const resteH = Math.max(0, Math.floor(resteMs / (1000 * 60 * 60)));
+
+                    container.innerHTML += `
+                        <div class="product-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="status-badge">En production</span>
+                                    <h3 class="font-black text-gray-800 mt-2 uppercase italic">${inv.nom}</h3>
+                                    <p class="text-[10px] text-gray-400 font-bold">Acheté le : ${dateAchat}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-purple-600 font-black text-sm">+${inv.gainJournalier.toLocaleString()} CDF</p>
+                                    <p class="text-[8px] text-gray-400 font-bold uppercase">Par jour</p>
+                                </div>
+                            </div>
+                            
+                            <div class="timer-box">
+                                <i class="fa-solid fa-clock-rotate-left animate-spin-slow"></i>
+                                <span>Prochaine récolte dans environ ${resteH} heures</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                container.innerHTML = "<p class='text-center text-red-500 text-xs'>Erreur de chargement.</p>";
+            }
+        }
+
+        window.onload = loadMyInvestments;
+    </script>
+
+    <style>
+        .animate-spin-slow { animation: spin 4s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-bounce-short { animation: bounce 1s ease-in-out 1; }
+    </style>
+</body>
+</html>

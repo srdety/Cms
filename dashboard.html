@@ -87,21 +87,19 @@
 
     <nav class="bottom-nav">
         <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-house"></i><span>Accueil</span></a>
-        <a href="produit.html" class="nav-link"><i class="fa-solid fa-camera"></i><span>Produit</span></a>
+        <a href="produit.html" class="nav-link"><i class="fa-solid fa-gem"></i><span>Produit</span></a>
         <a href="equipe.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Équipe</span></a>
         <a href="compte.html" class="nav-link"><i class="fa-solid fa-user"></i><span>Mon compte</span></a>
     </nav>
 
     <script>
         const userPhone = localStorage.getItem('userPhone');
-        // Utilisation du lien Firebase CMS correct
         const dbURL = "https://firstsolar-e2ba3-default-rtdb.firebaseio.com";
 
         if(!userPhone) { window.location.href = "login.html"; }
 
         async function syncAndCollect() {
             try {
-                // Récupérer données utilisateur CMS
                 const uRes = await fetch(`${dbURL}/users/${userPhone}.json`);
                 const user = await uRes.json();
 
@@ -109,7 +107,6 @@
                     let currentBalance = parseFloat(user.balance) || 0;
                     let currentIncome = parseFloat(user.revenuCumule) || 0;
 
-                    // Mise à jour de l'affichage
                     document.getElementById('userBalance').innerText = currentBalance.toLocaleString() + " CDF";
                     document.getElementById('userIncome').innerText = currentIncome.toLocaleString() + " CDF";
                     

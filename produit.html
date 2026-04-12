@@ -12,7 +12,7 @@
         .vip-card { background: white; border-radius: 25px; overflow: hidden; margin-bottom: 25px; border: 1px solid rgba(168, 85, 247, 0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .vip-img { width: 100%; height: 210px; object-fit: cover; }
         .details-box { background: #faf5ff; border: 1px solid #f3e8ff; border-radius: 15px; padding: 12px; margin-top: 10px; }
-        .btn-buy { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; width: 100%; padding: 16px; border-radius: 18px; font-weight: 900; text-transform: uppercase; transition: 0.3s; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
+        .btn-buy { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; width: 100%; padding: 16px; border-radius: 18px; font-weight: 900; text-transform: uppercase; transition: 0.3s; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); cursor: pointer; }
         .invest-badge { background: var(--accent-color); color: white; padding: 5px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; z-index: 1000; }
     </style>
@@ -45,7 +45,7 @@
     </nav>
 
     <script>
-        const cycleDays = 22; // Cycle de revenus de 22 jours
+        const cycleDays = 22; 
         const vipData = [
             { id: 1, img: "IMG_4397.jpeg", price: 18000, daily: 3700 },
             { id: 2, img: "IMG_4398.jpeg", price: 35000, daily: 7500 },
@@ -91,7 +91,7 @@
                             </div>
                         </div>
 
-                        <button onclick="acheterProduit(${vip.id}, ${vip.price}, ${vip.daily})" class="btn-buy">Activer l'Exploitation</button>
+                        <button onclick="acheterProduit(${vip.id}, ${vip.price}, ${vip.daily}, '${vip.img}')" class="btn-buy">Activer l'Exploitation</button>
                     </div>
                 </div>
             `;
@@ -104,70 +104,53 @@
                 const investissements = await iRes.json();
                 
                 if(investissements) {
-                    document.getElementById('investCount').innerText = Object.keys(investissements).length;
-                    const uRes = await fetch(`${dbURL}/users/${userPhone}.json`);
-                    const user = await uRes.json();
-                    let totalGains = 0;
-                    const now = Date.now();
-
-                    for (let key in investissements) {
-                        const inv = investissements[key];
-                        const derniereCollecte = new Date(inv.dernierCollecte).getTime();
-                        if (now - derniereCollecte >= 86400000) {
-                            const joursPasses = Math.floor((now - derniereCollecte) / 86400000);
-                            totalGains += inv.gainJournalier * joursPasses;
-                            const nouvelleDate = new Date(derniereCollecte + (joursPasses * 86400000)).toISOString();
-                            await fetch(`${dbURL}/investissements/${userPhone}/${key}.json`, {
-                                method: 'PATCH',
-                                body: JSON.stringify({ dernierCollecte: nouvelleDate })
-                            });
-                        }
-                    }
-
-                    if (totalGains > 0) {
-                        const nouvelleBalance = (parseFloat(user.balance) || 0) + totalGains;
-                        const nouveauCumule = (parseFloat(user.revenuCumule) || 0) + totalGains;
-                        await fetch(`${dbURL}/users/${userPhone}.json`, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ balance: nouvelleBalance, revenuCumule: nouveauCumule })
-                        });
-                        alert(`Félicitations ! Vos revenus journaliers de +${totalGains.toLocaleString()} CDF ont été ajoutés.`);
-                    }
+                    // MISE À JOUR DU COMPTEUR (1, 2, 3...)
+                    const nbProduits = Object.keys(investissements).length;
+                    document.getElementById('investCount').innerText = nbProduits;
                 }
             } catch (e) { console.error(e); }
         }
 
-        async function acheterProduit(id, prix, gain) {
+        async function acheterProduit(id, prix, gain, image) {
             if(!userPhone) return window.location.href="login.html";
-            const response = await fetch(`${dbURL}/users/${userPhone}.json`);
-            const user = await response.json();
+            
+            try {
+                const response = await fetch(`${dbURL}/users/${userPhone}.json`);
+                const user = await response.json();
 
-            if (user.balance >= prix) {
-                const nouveauSolde = user.balance - prix;
-                const achat = {
-                    vipId: id,
-                    nom: "Gisement VIP " + id,
-                    gainJournalier: gain,
-                    dateAchat: new Date().toISOString(),
-                    dernierCollecte: new Date().toISOString(),
-                    expireLe: new Date(Date.now() + cycleDays * 24 * 60 * 60 * 1000).toISOString()
-                };
+                if (user.balance >= prix) {
+                    const nouveauSolde = user.balance - prix;
+                    
+                    const achat = {
+                        vipId: id,
+                        nom: "Gisement VIP " + id,
+                        image: image, // On enregistre l'image pour l'afficher plus tard
+                        gainJournalier: gain,
+                        dateAchat: new Date().toISOString(),
+                        dernierCollecte: new Date().toISOString(),
+                        expireLe: new Date(Date.now() + cycleDays * 24 * 60 * 60 * 1000).toISOString(),
+                        status: "actif"
+                    };
 
-                await fetch(`${dbURL}/users/${userPhone}.json`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ balance: nouveauSolde, vipActive: id, droitRetrait: true })
-                });
+                    // 1. Déduire le solde
+                    await fetch(`${dbURL}/users/${userPhone}.json`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ balance: nouveauSolde, droitRetrait: true })
+                    });
 
-                await fetch(`${dbURL}/investissements/${userPhone}.json`, {
-                    method: 'POST',
-                    body: JSON.stringify(achat)
-                });
+                    // 2. Enregistrer l'investissement
+                    await fetch(`${dbURL}/investissements/${userPhone}.json`, {
+                        method: 'POST',
+                        body: JSON.stringify(achat)
+                    });
 
-                alert("Exploitation minière activée ! Vos gains seront versés toutes les 24h.");
-                window.location.reload();
-            } else {
-                alert("Solde insuffisant pour cet investissement.");
-            }
+                    alert("Exploitation minière activée ! Redirection vers vos produits...");
+                    // Redirection vers la page mes produits pour voir l'image et récolter
+                    window.location.href = "mes_produits.html";
+                } else {
+                    alert("Solde insuffisant pour cet investissement.");
+                }
+            } catch (e) { alert("Erreur lors de l'achat."); }
         }
 
         window.onload = updateStatsAndCollect;

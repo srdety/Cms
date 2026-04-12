@@ -11,10 +11,10 @@
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
         .header-mini { background: linear-gradient(135deg, var(--primary), var(--dark)); padding: 30px 20px; border-radius: 0 0 30px 30px; color: white; text-align: center; }
         .product-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        .product-img { width: 100%; height: 150px; object-fit: cover; }
+        .product-img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
         .status-badge { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .timer-box { background: #f3e8ff; color: var(--dark); padding: 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-collect { background: linear-gradient(135deg, #10b981, #059669); color: white; width: 100%; padding: 12px; border-radius: 12px; font-weight: 900; margin-top: 10px; display: none; }
+        .btn-collect { background: linear-gradient(135deg, #10b981, #059669); color: white; width: 100%; padding: 14px; border-radius: 12px; font-weight: 900; margin-top: 10px; transition: 0.3s; }
     </style>
 </head>
 <body class="p-4">
@@ -43,6 +43,22 @@
         const db = getDatabase(app);
         const userPhone = localStorage.getItem('userPhone');
 
+        // Référence automatique des images selon le nom du VIP
+        const imageMap = {
+            "Gisement VIP 1": "IMG_4397.jpeg",
+            "Gisement VIP 2": "IMG_4398.jpeg",
+            "Gisement VIP 3": "IMG_4399.jpeg",
+            "Gisement VIP 4": "IMG_4400.jpeg",
+            "Gisement VIP 5": "IMG_4401.jpeg",
+            "Gisement VIP 6": "IMG_4402.jpeg",
+            "Gisement VIP 7": "IMG_4403.jpeg",
+            "Gisement VIP 8": "IMG_4404.jpeg",
+            "Gisement VIP 9": "IMG_4405.jpeg",
+            "Gisement VIP 10": "IMG_4406.jpeg",
+            "Gisement VIP 11": "IMG_4407.jpeg",
+            "Gisement VIP 12": "IMG_4408.jpeg"
+        };
+
         async function loadMyInvestments() {
             if(!userPhone) return window.location.href = "login.html";
             
@@ -59,12 +75,14 @@
                 container.innerHTML = "";
                 for(let id in data) {
                     const inv = data[id];
-                    const imageSrc = inv.image || "default-mining.jpg"; // Image de secours si vide
+                    
+                    // On cherche l'image soit dans la base, soit dans notre dictionnaire local
+                    const imageSrc = inv.image || imageMap[inv.nom] || "default-mining.jpg";
                     
                     const maintenant = Date.now();
                     const derniere = new Date(inv.dernierCollecte).getTime();
                     const ecart = maintenant - derniere;
-                    const delai = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
+                    const delai = 24 * 60 * 60 * 1000;
                     
                     const peutRecolter = ecart >= delai;
                     const resteMs = delai - ecart;
@@ -73,18 +91,18 @@
 
                     container.innerHTML += `
                         <div class="product-card">
-                            <img src="${imageSrc}" class="product-img" onerror="this.src='https://via.placeholder.com/400x200?text=Gisement+Mining'">
+                            <img src="${imageSrc}" class="product-img" alt="${inv.nom}">
                             <div class="p-4">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <span class="status-badge">Actif</span>
+                                        <span class="status-badge">Exploitation en cours</span>
                                         <h3 class="font-black text-gray-800 mt-1 uppercase italic">${inv.nom}</h3>
-                                        <p class="text-[10px] text-gray-400 font-bold">Revenu: ${inv.gainJournalier.toLocaleString()} CDF / jour</p>
+                                        <p class="text-[10px] text-gray-400 font-bold">Gain : ${inv.gainJournalier.toLocaleString()} CDF / 24h</p>
                                     </div>
                                 </div>
                                 
                                 ${peutRecolter ? 
-                                    `<button onclick="recolter('${id}', ${inv.gainJournalier})" class="btn-collect" style="display:block">RÉCOLTER MES GAINS</button>` : 
+                                    `<button onclick="recolter('${id}', ${inv.gainJournalier})" class="btn-collect">RÉCOLTER MES GAINS</button>` : 
                                     `<div class="timer-box">
                                         <i class="fa-solid fa-clock-rotate-left"></i>
                                         <span>Prochaine récolte dans ${resteH}h ${resteM}m</span>
@@ -99,24 +117,21 @@
 
         window.recolter = async (invId, gain) => {
             try {
-                // 1. Mettre à jour le solde utilisateur
                 const userSnap = await get(ref(db, `users/${userPhone}`));
-                const currentBalance = userSnap.val().balance || 0;
-                const currentCumule = userSnap.val().revenuCumule || 0;
+                const userData = userSnap.val();
                 
                 await update(ref(db, `users/${userPhone}`), {
-                    balance: currentBalance + gain,
-                    revenuCumule: currentCumule + gain
+                    balance: (userData.balance || 0) + gain,
+                    revenuCumule: (userData.revenuCumule || 0) + gain
                 });
 
-                // 2. Mettre à jour la date de dernière collecte
                 await update(ref(db, `investissements/${userPhone}/${invId}`), {
                     dernierCollecte: new Date().toISOString()
                 });
 
-                alert("Récolte réussie ! +" + gain + " CDF ajoutés à votre solde.");
+                alert("Bravo ! +" + gain + " CDF ajoutés à votre compte.");
                 location.reload();
-            } catch (e) { alert("Erreur lors de la récolte."); }
+            } catch (e) { alert("Erreur."); }
         };
 
         window.onload = loadMyInvestments;

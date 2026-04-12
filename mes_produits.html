@@ -10,9 +10,11 @@
         :root { --primary: #a855f7; --dark: #7c3aed; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
         .header-mini { background: linear-gradient(135deg, var(--primary), var(--dark)); padding: 30px 20px; border-radius: 0 0 30px 30px; color: white; text-align: center; }
-        .product-card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; border-left: 5px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .product-img { width: 100%; height: 150px; object-fit: cover; }
         .status-badge { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-        .timer-box { background: #f3e8ff; color: var(--dark); padding: 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+        .timer-box { background: #f3e8ff; color: var(--dark); padding: 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-collect { background: linear-gradient(135deg, #10b981, #059669); color: white; width: 100%; padding: 12px; border-radius: 12px; font-weight: 900; margin-top: 10px; display: none; }
     </style>
 </head>
 <body class="p-4">
@@ -27,14 +29,14 @@
     </div>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-around items-center z-50">
-        <a href="dashboard.html" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-house"></i><span class="text-[9px] font-bold">Accueil</span></a>
-        <a href="produit.html" class="text-purple-600 flex flex-col items-center"><i class="fa-solid fa-gem"></i><span class="text-[9px] font-bold">Produit</span></a>
-        <a href="compte.html" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-circle-user"></i><span class="text-[9px] font-bold">Compte</span></a>
+        <a href="dashboard.html" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-house text-xl"></i><span class="text-[9px] font-bold">Accueil</span></a>
+        <a href="produit.html" class="text-purple-600 flex flex-col items-center"><i class="fa-solid fa-gem text-xl"></i><span class="text-[9px] font-bold">Produit</span></a>
+        <a href="compte.html" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold">Compte</span></a>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://firstsolar-e2ba3-default-rtdb.firebaseio.com" };
         const app = initializeApp(firebaseConfig);
@@ -50,59 +52,74 @@
                 const data = snap.val();
 
                 if(!data) {
-                    container.innerHTML = `
-                        <div class="text-center py-20 opacity-30">
-                            <i class="fa-solid fa-box-open text-6xl mb-4"></i>
-                            <p class="text-xs font-black uppercase">Aucun investissement actif</p>
-                            <button onclick="window.location.href='produit.html'" class="mt-4 text-purple-600 font-bold text-xs underline">Voir les produits</button>
-                        </div>`;
+                    container.innerHTML = `<div class="text-center py-20 opacity-30"><p class="text-xs font-black uppercase">Aucun investissement actif</p></div>`;
                     return;
                 }
 
                 container.innerHTML = "";
                 for(let id in data) {
                     const inv = data[id];
-                    const dateAchat = new Date(inv.dateAchat).toLocaleDateString();
+                    const imageSrc = inv.image || "default-mining.jpg"; // Image de secours si vide
                     
-                    // Calcul du temps restant pour la prochaine collecte
-                    const derniere = new Date(inv.dernierCollecte).getTime();
                     const maintenant = Date.now();
-                    const resteMs = 86400000 - (maintenant - derniere);
+                    const derniere = new Date(inv.dernierCollecte).getTime();
+                    const ecart = maintenant - derniere;
+                    const delai = 24 * 60 * 60 * 1000; // 24 heures en millisecondes
+                    
+                    const peutRecolter = ecart >= delai;
+                    const resteMs = delai - ecart;
                     const resteH = Math.max(0, Math.floor(resteMs / (1000 * 60 * 60)));
+                    const resteM = Math.max(0, Math.floor((resteMs % (1000 * 60 * 60)) / (1000 * 60)));
 
                     container.innerHTML += `
                         <div class="product-card">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="status-badge">En production</span>
-                                    <h3 class="font-black text-gray-800 mt-2 uppercase italic">${inv.nom}</h3>
-                                    <p class="text-[10px] text-gray-400 font-bold">Acheté le : ${dateAchat}</p>
+                            <img src="${imageSrc}" class="product-img" onerror="this.src='https://via.placeholder.com/400x200?text=Gisement+Mining'">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <span class="status-badge">Actif</span>
+                                        <h3 class="font-black text-gray-800 mt-1 uppercase italic">${inv.nom}</h3>
+                                        <p class="text-[10px] text-gray-400 font-bold">Revenu: ${inv.gainJournalier.toLocaleString()} CDF / jour</p>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-purple-600 font-black text-sm">+${inv.gainJournalier.toLocaleString()} CDF</p>
-                                    <p class="text-[8px] text-gray-400 font-bold uppercase">Par jour</p>
-                                </div>
-                            </div>
-                            
-                            <div class="timer-box">
-                                <i class="fa-solid fa-clock-rotate-left animate-spin-slow"></i>
-                                <span>Prochaine récolte dans environ ${resteH} heures</span>
+                                
+                                ${peutRecolter ? 
+                                    `<button onclick="recolter('${id}', ${inv.gainJournalier})" class="btn-collect" style="display:block">RÉCOLTER MES GAINS</button>` : 
+                                    `<div class="timer-box">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                        <span>Prochaine récolte dans ${resteH}h ${resteM}m</span>
+                                    </div>`
+                                }
                             </div>
                         </div>
                     `;
                 }
-            } catch (e) {
-                container.innerHTML = "<p class='text-center text-red-500 text-xs'>Erreur de chargement.</p>";
-            }
+            } catch (e) { console.error(e); }
         }
+
+        window.recolter = async (invId, gain) => {
+            try {
+                // 1. Mettre à jour le solde utilisateur
+                const userSnap = await get(ref(db, `users/${userPhone}`));
+                const currentBalance = userSnap.val().balance || 0;
+                const currentCumule = userSnap.val().revenuCumule || 0;
+                
+                await update(ref(db, `users/${userPhone}`), {
+                    balance: currentBalance + gain,
+                    revenuCumule: currentCumule + gain
+                });
+
+                // 2. Mettre à jour la date de dernière collecte
+                await update(ref(db, `investissements/${userPhone}/${invId}`), {
+                    dernierCollecte: new Date().toISOString()
+                });
+
+                alert("Récolte réussie ! +" + gain + " CDF ajoutés à votre solde.");
+                location.reload();
+            } catch (e) { alert("Erreur lors de la récolte."); }
+        };
 
         window.onload = loadMyInvestments;
     </script>
-
-    <style>
-        .animate-spin-slow { animation: spin 4s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-bounce-short { animation: bounce 1s ease-in-out 1; }
-    </style>
 </body>
 </html>

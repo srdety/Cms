@@ -27,14 +27,6 @@
         .nav-link.active { color: var(--accent-color); }
         .nav-link i { font-size: 24px; display: block; margin-bottom: 2px; }
         #modal { position: fixed; inset: 0; background: rgba(15, 10, 25, 0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
-        
-        /* Style ajouté pour la calligraphie */
-        .texte-calligraphie {
-            font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Print', cursive;
-            font-size: 13px;
-            line-height: 1.4;
-            color: #374151;
-        }
     </style>
 </head>
 <body>
@@ -45,23 +37,23 @@
                 <h2 class="text-white font-black text-xl uppercase tracking-widest italic">CMS RDC</h2>
             </div>
             <div class="p-8">
-                <p class="texte-calligraphie mb-6 text-center">
-                    L’entreprise <span class="font-black text-[#7c3aed]" style="font-family: sans-serif; font-size: 14px;">CMS</span> a été officiellement lancée en République Démocratique du Congo ce dimanche 12 avril 2026. Elle offre aux Congolais l’opportunité de générer des revenus journaliers grâce à un système d’investissement en ligne sécurisé.
+                <p class="text-gray-800 leading-relaxed mb-6 text-center" style="font-family: 'Brush Script MT', 'Lucida Handwriting', cursive; font-size: 14px;">
+                    L’entreprise <span class="font-black text-[#7c3aed]" style="font-family: sans-serif;">CMS</span> a été officiellement lancée en République Démocratique du Congo ce dimanche 12 avril 2026. Elle offre aux Congolais l’opportunité de générer des revenus journaliers grâce à un système d’investissement en ligne sécurisé.
                     <br><br>
                     En cas de difficulté, notre service client est disponible et peut être contacté directement via notre canal officiel.
                 </p>
                 
-                <div class="space-y-3 mb-4">
-                    <a href="https://t.me/+IuQS1ZQt7eZjMzZk" class="block w-full bg-[#0088cc] text-white font-black py-3.5 rounded-2xl text-center shadow-md uppercase text-[10px] tracking-wider">
-                        <i class="fab fa-telegram-plane mr-2 text-sm"></i> Rejoindre le Groupe Telegram
+                <div class="flex flex-col gap-3 mb-4">
+                    <a href="https://t.me/+IuQS1ZQt7eZjMzZk" class="block w-full bg-[#0088cc] text-white font-black py-4 rounded-2xl text-center shadow-lg uppercase text-xs">
+                        <i class="fab fa-telegram-plane mr-2"></i> Rejoindre le Groupe Telegram
                     </a>
                     
-                    <a href="https://wa.me/243854222980" class="block w-full bg-[#25D366] text-white font-black py-3.5 rounded-2xl text-center shadow-md uppercase text-[10px] tracking-wider">
-                        <i class="fab fa-whatsapp mr-2 text-sm"></i> Service Client WhatsApp
+                    <a href="https://wa.me/243983407206" class="block w-full bg-[#25D366] text-white font-black py-4 rounded-2xl text-center shadow-lg uppercase text-xs">
+                        <i class="fab fa-whatsapp mr-2 text-lg"></i> Service Client WhatsApp
                     </a>
                 </div>
 
-                <button onclick="document.getElementById('modal').style.display='none'" class="w-full text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-purple-600 mt-2">Fermer</button>
+                <button onclick="document.getElementById('modal').style.display='none'" class="w-full text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-purple-600">Fermer</button>
             </div>
         </div>
     </div>
@@ -104,7 +96,7 @@
     <nav class="bottom-nav">
         <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-house"></i><span>Accueil</span></a>
         <a href="produit.html" class="nav-link"><i class="fa-solid fa-camera"></i><span>Produit</span></a>
-        <a href="profil.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Profil</span></a>
+        <a href="equipe.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Équipe</span></a>
         <a href="compte.html" class="nav-link"><i class="fa-solid fa-user"></i><span>Mon compte</span></a>
     </nav>
 
